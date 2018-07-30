@@ -60,6 +60,7 @@ namespace Templates.Test.SpaTemplateTest
 
         private void TestBasicNavigation()
         {
+            Browser.WaitForElement("ul");
             // <title> element gets project ID injected into it during template execution
             Assert.Contains(ProjectGuid, Browser.Title);
 

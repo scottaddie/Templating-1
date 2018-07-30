@@ -16,28 +16,23 @@ $csproj = Join-Path $projects "Angular-CSharp.csproj.in"
 (Get-Content $csproj).replace('<PackageReference Include="Microsoft.AspNetCore.App"', '<PackageReference Include="Microsoft.NETCore.App" Version="${MicrosoftNETCoreApp22PackageVersion}" />
     <PackageReference Include="Microsoft.AspNetCore.App"') | Set-Content $csproj
 
+dotnet new --uninstall Microsoft.DotNet.Web.Spa.ProjectTemplates
+dotnet new --uninstall Microsoft.DotNet.Web.Spa.ProjectTemplates.2.2
 ./build.cmd /t:Package
+dotnet new --install "$PSScriptRoot/../artifacts/build/Microsoft.DotNet.Web.Spa.ProjectTemplates.2.2.0-preview1-t000.nupkg"
 
-Push-Location "$projects/content/Angular-CSharp"
+New-Item -ErrorAction Ignore "tmp" -ItemType Directory
+Push-Location "tmp"
 try {
-    $launchSettings = "Properties\launchSettings.json"
-    (Get-Content $launchSettings).replace('"sslPort": 0', '') | Set-Content $launchSettings
-
-    dotnet publish
-    Push-Location "bin\Release\netcoreapp2.2\publish\"
+    dotnet new angular
+    Push-Location "ClientApp"
     try {
-        Push-Location "ClientApp"
-        try {
-            npm install
-        }
-        finally {
-            Pop-Location
-        }
-        dotnet "Company.WebApplication1.dll"
+        npm install
     }
     finally {
         Pop-Location
     }
+    dotnet run
 }
 finally {
     Pop-Location
