@@ -125,6 +125,7 @@ namespace Templates.Test.Helpers
                     }
                 }
             }
+            driver.WaitForUrl("/");
         }
 
         private Uri GetListeningUri(ITestOutputHelper output)
