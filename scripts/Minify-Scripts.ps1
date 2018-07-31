@@ -7,8 +7,7 @@ param()
 Set-StrictMode -Version 2
 $ErrorActionPreference = 'Stop'
 
-npm install -g uglifycss
-npm install -g uglify-js
+npm install
 
 $projectContentDir = "$PSScriptRoot/../src/Microsoft.DotNet.Web.ProjectTemplates/content"
 
