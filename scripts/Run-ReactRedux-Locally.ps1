@@ -1,41 +1,32 @@
-#!/usr/bin/env powershell
+#!/usr/bin/env pwsh
 #requires -version 4
 
 [CmdletBinding(PositionalBinding = $false)]
 param()
 
-# BEWARE: This script makes changes to source files which you will have to seperate from any changes you want to keep before commiting.
-
 Set-StrictMode -Version 2
 $ErrorActionPreference = 'Stop'
 
-git clean -xdf
-$projects = "$PSScriptRoot/../src/Microsoft.DotNet.Web.Spa.ProjectTemplates"
+$customHive = "$PSScriptRoot/CustomHive"
+New-Item -ErrorAction Ignore -Path $customHive -ItemType Directory
 
-$csproj = Join-Path $projects "ReactRedux-CSharp.csproj.in"
-(Get-Content $csproj).replace('<PackageReference Include="Microsoft.AspNetCore.App"', '<PackageReference Include="Microsoft.NETCore.App" Version="${MicrosoftNETCoreApp22PackageVersion}" />
-    <PackageReference Include="Microsoft.AspNetCore.App"') | Set-Content $csproj
-
+dotnet new --uninstall Microsoft.DotNet.Web.Spa.ProjectTemplates --debug:custom-hive $customHive
+dotnet new --uninstall Microsoft.DotNet.Web.Spa.ProjectTemplates.2.2 --debug:custom-hive $customHive
 ./build.cmd /t:Package
+dotnet new --install --debug:custom-hive $customHive "$PSScriptRoot/../artifacts/build/Microsoft.DotNet.Web.Spa.ProjectTemplates.2.2.0-preview1-t000.nupkg"
 
-Push-Location "$projects/content/ReactRedux-CSharp"
+New-Item -ErrorAction Ignore -Path "$PSScriptRoot/tmp" -ItemType Directory
+Push-Location "$PSScriptRoot/tmp"
 try {
-    $launchSettings = "Properties\launchSettings.json"
-    (Get-Content $launchSettings).replace('"sslPort": 0', '') | Set-Content $launchSettings
-
+    dotnet new reactredux
+    Push-Location "ClientApp"
     try {
-        Push-Location "ClientApp"
-        try {
-            npm install
-        }
-        finally {
-            Pop-Location
-        }
-        dotnet run
+        npm install
     }
     finally {
         Pop-Location
     }
+    dotnet run
 }
 finally {
     Pop-Location
